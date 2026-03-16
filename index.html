@@ -1,207 +1,25 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D 小球收集游戏</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { overflow: hidden; background: #111; font-family: Arial, sans-serif; }
-        #gameContainer { width: 100vw; height: 100vh; }
-        #score {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            color: white;
-            font-size: 24px;
-            z-index: 100;
-        }
-        #instructions {
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            color: #ccc;
-            font-size: 14px;
-            text-align: center;
-            z-index: 100;
-        }
-    </style>
+<title>校园科技节</title>
 </head>
-<body>
-    <div id="score">得分: 0</div>
-    <div id="instructions">
-        🎮 操作说明：<br>
-        鼠标拖动 = 旋转视角 | WASD = 移动 | 空格 = 跳跃<br>
-        收集黄色小球得分！
-    </div>
-    <div id="gameContainer"></div>
 
-    <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
-    <script>
-        // 1. 初始化核心组件
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ antialias: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.shadowMap.enabled = true; // 启用阴影
-        document.getElementById('gameContainer').appendChild(renderer.domElement);
-
-        // 2. 添加光照
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
-        scene.add(ambientLight);
-        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-        directionalLight.position.set(10, 20, 10);
-        directionalLight.castShadow = true; // 灯光投射阴影
-        scene.add(directionalLight);
-
-        // 3. 创建地面
-        const groundGeometry = new THREE.PlaneGeometry(100, 100);
-        const groundMaterial = new THREE.MeshStandardMaterial({ color: 0x228822 });
-        const ground = new THREE.Mesh(groundGeometry, groundMaterial);
-        ground.rotation.x = -Math.PI / 2; // 旋转为水平
-        ground.receiveShadow = true; // 接收阴影
-        scene.add(ground);
-
-        // 4. 创建玩家小球
-        const playerGeometry = new THREE.SphereGeometry(1, 32, 32);
-        const playerMaterial = new THREE.MeshStandardMaterial({ color: 0x0088ff });
-        const player = new THREE.Mesh(playerGeometry, playerMaterial);
-        player.position.set(0, 1, 0);
-        player.castShadow = true; // 投射阴影
-        scene.add(player);
-
-        // 5. 创建目标小球（收集物）
-        const collectibles = [];
-        const collectibleCount = 10; // 收集物数量
-        for (let i = 0; i < collectibleCount; i++) {
-            const geometry = new THREE.SphereGeometry(0.8, 32, 32);
-            const material = new THREE.MeshStandardMaterial({ color: 0xffff00 });
-            const collectible = new THREE.Mesh(geometry, material);
-            // 随机位置（避免重叠）
-            collectible.position.set(
-                (Math.random() - 0.5) * 80,
-                0.8,
-                (Math.random() - 0.5) * 80
-            );
-            collectible.castShadow = true;
-            scene.add(collectible);
-            collectibles.push(collectible);
-        }
-
-        // 6. 游戏状态
-        let score = 0;
-        const scoreElement = document.getElementById('score');
-        const moveSpeed = 5;
-        const jumpForce = 8;
-        let velocityY = 0;
-        const gravity = -0.2;
-        let isJumping = false;
-
-        // 7. 控制逻辑
-        const keys = {};
-        document.addEventListener('keydown', (e) => { keys[e.code] = true; });
-        document.addEventListener('keyup', (e) => { keys[e.code] = false; });
-
-        // 鼠标视角控制
-        let isMouseDown = false;
-        let lastMouseX = 0;
-        let lastMouseY = 0;
-        let cameraAngleX = 0;
-        let cameraAngleY = 0;
-
-        document.addEventListener('mousedown', (e) => {
-            isMouseDown = true;
-            lastMouseX = e.clientX;
-            lastMouseY = e.clientY;
-        });
-        document.addEventListener('mouseup', () => isMouseDown = false);
-        document.addEventListener('mousemove', (e) => {
-            if (isMouseDown) {
-                const deltaX = e.clientX - lastMouseX;
-                const deltaY = e.clientY - lastMouseY;
-                cameraAngleY += deltaX * 0.01;
-                cameraAngleX = Math.max(-Math.PI/2, Math.min(Math.PI/2, cameraAngleX - deltaY * 0.01));
-                lastMouseX = e.clientX;
-                lastMouseY = e.clientY;
-            }
-        });
-
-        // 8. 碰撞检测
-        function checkCollision() {
-            for (let i = collectibles.length - 1; i >= 0; i--) {
-                const collectible = collectibles[i];
-                const distance = player.position.distanceTo(collectible.position);
-                if (distance < 1.8) { // 碰撞距离
-                    // 收集小球
-                    scene.remove(collectible);
-                    collectibles.splice(i, 1);
-                    score += 10;
-                    scoreElement.textContent = `得分: ${score}`;
-                    
-                    // 全部收集完提示
-                    if (collectibles.length === 0) {
-                        alert('恭喜！收集完所有小球，游戏胜利！');
-                    }
-                }
-            }
-        }
-
-        // 9. 动画循环
-        function animate() {
-            requestAnimationFrame(animate);
-
-            // 更新相机位置（跟随视角）
-            const cameraRadius = 15;
-            camera.position.x = player.position.x + cameraRadius * Math.sin(cameraAngleY) * Math.cos(cameraAngleX);
-            camera.position.y = player.position.y + 5 + cameraRadius * Math.sin(cameraAngleX);
-            camera.position.z = player.position.z + cameraRadius * Math.cos(cameraAngleY) * Math.cos(cameraAngleX);
-            camera.lookAt(player.position);
-
-            // 玩家移动
-            const moveVector = new THREE.Vector3();
-            if (keys['KeyW']) moveVector.z -= 1;
-            if (keys['KeyS']) moveVector.z += 1;
-            if (keys['KeyA']) moveVector.x -= 1;
-            if (keys['KeyD']) moveVector.x += 1;
-            moveVector.normalize(); // 标准化方向
-            moveVector.applyAxisAngle(new THREE.Vector3(0, 1, 0), -cameraAngleY); // 跟随视角方向
-
-            // 水平移动
-            player.position.x += moveVector.x * moveSpeed * 0.016;
-            player.position.z += moveVector.z * moveSpeed * 0.016;
-
-            // 跳跃和重力
-            if (keys['Space'] && !isJumping) {
-                velocityY = jumpForce;
-                isJumping = true;
-            }
-            velocityY += gravity;
-            player.position.y += velocityY * 0.016;
-            
-            // 落地检测
-            if (player.position.y <= 1) {
-                player.position.y = 1;
-                velocityY = 0;
-                isJumping = false;
-            }
-
-            // 碰撞检测
-            checkCollision();
-
-            // 渲染场景
-            renderer.render(scene, camera);
-        }
-
-        // 10. 窗口自适应
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
-
-        // 启动游戏
-        animate();
-    </script>
+<body >
+<center>
+<h2>科技节体验项目——</h2><h1> 3D打印</h1>
+</center>
+<p></p><p></p>
+</div>
+<p>&nbsp; &nbsp; &nbsp; &nbsp;3D打印，即三维打印，是一种以数字模型文件为基础，运用金属或塑料等粉末材料以及黏合剂，通过逐层打印的方式来构造物体的技术。当三维打印机为小型化的设备时，此技术称为桌面三维打印。</p>
+<center> 
+<img src="images/3D.jpg" width="348"/>
+<p></p>
+</center>
+<p></p>
+<center> 
+<<< 主页 >>>
+</center>
 </body>
 </html>
+
+
+

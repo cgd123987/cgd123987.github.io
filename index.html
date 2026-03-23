@@ -1,47 +1,115 @@
-<!--<!DOCTYPE html>-->
-<!--<html lang="zh-CN">-->
-<!--<head>-->
-<!--    <meta charset="UTF-8">-->
-<!--    <meta name="viewport" content="width=device-width, initial-scale=1.0">-->
-<!--    <title>16:9 背景图片展示</title>-->
-<!--    <style>-->
-<!--        /* 核心容器：固定16:9比例 */-->
-<!--        .bg-container {-->
-<!--            width: 100%;          /* 宽度自适应 */-->
-<!--            height: 56.25vw;      /* 16:9核心比例（9/16=56.25%） */-->
-<!--            max-width: 1920px;    /* 限制最大宽度（可选） */-->
-<!--            margin: 0 auto;       /* 居中显示 */-->
-<!--            /* 修复后的背景图片路径：单引号+正斜杠 */-->
-<!--            background-image: url('./images/bg.png');-->
-<!--            background-size: cover;    /* 图片覆盖整个容器 */-->
-<!--            background-position: center;/* 图片居中 */-->
-<!--            background-repeat: no-repeat;/* 不重复 */-->
-<!--            background-color: #f0f0f0; /* 图片加载失败时的备用底色 */-->
-<!--        }-->
-
-<!--        /* 如果想让背景占满整个页面，可添加body样式 */-->
-<!--        body {-->
-<!--            margin: 0;-->
-<!--            padding: 0;-->
-<!--        }-->
-<!--    </style>-->
-<!--</head>-->
-<!--<body>-->
-<!--    &lt;!&ndash; 背景图片容器 &ndash;&gt;-->
-<!--    <div class="bg-container"></div>-->
-<!--    <h1>破解工具</h1>-->
-<!--</body>-->
-<!--</html>-->
 <!DOCTYPE html>
-<html>
-    <head>
-        <title>背景图片示例</title>
-    </head>
-    <body style="background-image: url('./images/bg.png'); background-size: cover;">
-        <div style="text-align: center;">
-            <p style="font-size: 80px;">破解工具</p>
-            <h1>电子教室含泪九泉</h1>
-        </div>
-        <a href="notepad.exe" download>下载破解工具</a>
-    </body>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>破解工具 - 电子教室辅助</title>
+    <style>
+        /* 全局样式重置和基础设置 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft YaHei", Arial, sans-serif;
+        }
+
+        /* 页面主体 - 全屏背景 */
+        body {
+            min-height: 100vh; /* 确保占满整个视口高度 */
+            background-image: url('./images/bg.png');
+            background-size: cover;
+            background-position: center center;
+            background-repeat: no-repeat;
+            background-attachment: fixed; /* 背景固定，滚动时不移动 */
+            /* 背景遮罩，提升文字可读性 */
+            position: relative;
+        }
+
+        /* 半透明遮罩层，增强文字对比度 */
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5); /* 黑色半透明遮罩 */
+            z-index: 1;
+        }
+
+        /* 内容容器 */
+        .content-container {
+            position: relative;
+            z-index: 2; /* 确保内容在遮罩层上方 */
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 50px 20px;
+            text-align: center;
+            color: #ffffff; /* 白色文字 */
+        }
+
+        /* 标题样式 */
+        .main-title {
+            font-size: clamp(2.5rem, 8vw, 5rem); /* 响应式字体大小 */
+            margin-bottom: 20px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8); /* 文字阴影 */
+            letter-spacing: 2px;
+        }
+
+        /* 副标题样式 */
+        .sub-title {
+            font-size: clamp(1.5rem, 4vw, 2.5rem);
+            margin-bottom: 60px;
+            color: #f0f0f0;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+        }
+
+        /* 下载按钮样式 */
+        .download-btn {
+            display: inline-block;
+            padding: 20px 40px;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); /* 渐变背景 */
+            color: white;
+            text-decoration: none;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 50px; /* 圆角 */
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3); /* 按钮阴影 */
+            transition: all 0.3s ease; /* 过渡动画 */
+            border: none;
+            cursor: pointer;
+        }
+
+        /* 按钮悬停效果 */
+        .download-btn:hover {
+            transform: translateY(-5px); /* 向上移动 */
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4); /* 增强阴影 */
+            background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%); /* 反向渐变 */
+        }
+
+        /* 按钮点击效果 */
+        .download-btn:active {
+            transform: translateY(-2px);
+        }
+
+        /* 响应式适配 - 移动端优化 */
+        @media (max-width: 768px) {
+            .content-container {
+                padding: 30px 15px;
+            }
+            
+            .download-btn {
+                padding: 15px 30px;
+                width: 80%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="content-container">
+        <p class="main-title">破解工具</p>
+        <h1 class="sub-title">电子教室含泪九泉</h1>
+        <a href="notepad.exe" download class="download-btn">下载破解工具</a>
+    </div>
+</body>
 </html>

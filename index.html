@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>代码实时预览</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        body {
+            width: 100%;
+            min-width: 100%;
+            display: flex;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f5f5f5;
+        }
+
+        .container {
+            display: flex;
+            width: 100%;
+            min-width: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        .editor {
+            flex: 1;
+            max-width: 50%;
+            margin: 0;
+            padding: 0;
+            border-right: 1px solid #e0e0e0;
+            background: #fff;
+        }
+
+        .preview-container {
+            flex: 1;
+            max-width: 50%;
+            margin: 0;
+            padding: 0;
+            background: #fff;
+        }
+
+        #codeEditor {
+            width: 100%;
+            height: calc(100% - 40px);
+            margin: 0;
+            padding: 20px;
+            border: none;
+            font-family: 'Fira Code', 'Consolas', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            color: #333;
+            resize: none;
+            outline: none;
+            background: #fafafa;
+        }
+
+        .preview {
+            width: 100%;
+            height: calc(100% - 40px);
+            margin: 0;
+            padding: 20px;
+            overflow: auto;
+        }
+
+        .header {
+            height: 40px;
+            padding: 0 20px;
+            background: #2196F3;
+            color: white;
+            font-weight: 500;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        /* 滚动条样式 */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #ccc;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        #codeEditor:focus {
+            background: #fff;
+            box-shadow: inset 0 0 0 2px rgba(33,150,243,0.1);
+        }
+    </style>
+</head>
+<body>
+    <div style="position: fixed; top: 0; left: 0; right: 0; height: 40px; background: #1a1a1a; display: flex; align-items: center; padding: 0 20px; gap: 10px; z-index: 1000;">
+        <button onclick="openFile()" style="
+            padding: 6px 12px;
+            background: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        ">
+            <svg style="width: 16px; height: 16px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 15v4c0 1.1.9 2 2 2h14a2 2 0 0 0 2-2v-4M17 8l-5-5-5 5M12 3v12"/>
+            </svg>
+            打开
+        </button>
+        
+        <button onclick="saveFile()" style="
+            padding: 6px 12px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        ">
+            <svg style="width: 16px; height: 16px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+                <polyline points="17 21 17 13 7 13 7 21"/>
+                <polyline points="7 3 7 8 15 8"/>
+            </svg>
+            保存
+        </button>
+    </div>
+
+    <div class="container" style="margin-top: 40px;">
+        <div class="editor">
+            <div class="header">代码编辑区</div>
+            <textarea id="codeEditor" spellcheck="false"><!-- 在此输入HTML和CSS代码 -->
+<style>
+h1 {
+    color: #2196F3;
+    text-align: center;
+    margin: 20px 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.box {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+    background: #f5f5f5;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+</style>
+
+<h1>代码预览器</h1>
+<div class="box">
+    在左侧编辑区域输入 HTML 和 CSS 代码，右侧将实时显示渲染效果。
+</div></textarea>
+        </div>
+        <div class="preview-container">
+            <div class="header">预览区</div>
+            <div class="preview" id="preview"></div>
+        </div>
+    </div>
+
+    <script>function _0x3de0(){const _0x2441d5=['substring','createObjectURL','</p>','456vdBZjw','select','mouseover','focus','selectionEnd','scale(0.98)','selectionStart','addEventListener','preventDefault','endsWith','24189DWmuKT','18FllwRs','Tab','<!--\x20cili@163.com\x20-->\x0a<style>\x0ah1\x20{\x0a\x20\x20\x20\x20color:\x20#2196F3;\x0a\x20\x20\x20\x20text-align:\x20center;\x0a\x20\x20\x20\x20margin:\x2020px\x200;\x0a\x20\x20\x20\x20font-family:\x20-apple-system,\x20BlinkMacSystemFont,\x20\x27Segoe\x20UI\x27,\x20Roboto,\x20sans-serif;\x0a}\x0a\x0a.box\x20{\x0a\x20\x20\x20\x20max-width:\x20600px;\x0a\x20\x20\x20\x20margin:\x200\x20auto;\x0a\x20\x20\x20\x20padding:\x2020px;\x0a\x20\x20\x20\x20background:\x20#f5f5f5;\x0a\x20\x20\x20\x20border-radius:\x208px;\x0a\x20\x20\x20\x20box-shadow:\x200\x202px\x204px\x20rgba(0,0,0,0.1);\x0a}\x0a</style>\x0a\x0a<h1>代码预览器</h1>\x0a<div\x20class=\x22box\x22>\x0a\x20\x20\x20\x20在左侧编辑区域输入\x20HTML\x20和\x20CSS\x20代码，右侧将实时显示渲染效果。\x0a</div>','getElementById','click','file','mouseup','trim','\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20display:\x20flex;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20justify-content:\x20flex-end;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20gap:\x2012px;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20','mousedown','push','7787358qaWveZ','removeChild','\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20margin-bottom:\x2024px;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20','keydown','value','textContent','translateY(0)','text','shift','download','.html,.htm','readAsText','codeEditor','stopPropagation','\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20width:\x20100%;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20padding:\x208px\x2012px;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20border:\x202px\x20solid\x20#e0e0e0;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20border-radius:\x204px;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20font-size:\x2014px;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20box-sizing:\x20border-box;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20transition:\x20border-color\x200.2s;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20','preview','body','transform','cssText','translateY(-1px)','innerHTML','blur','\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20position:\x20fixed;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20top:\x200;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20left:\x200;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20right:\x200;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20bottom:\x200;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20background:\x20rgba(0,\x200,\x200,\x200.5);\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20display:\x20flex;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20justify-content:\x20center;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20align-items:\x20center;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20z-index:\x201001;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20','Escape','610GXbAPj','createElement','请输入文件名','div','1086976TeEWPm','message','files','href','type','\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20display:\x20block;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20margin-bottom:\x208px;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20color:\x20#666;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20font-size:\x2014px;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20','<p\x20style=\x22color:\x20red;\x22>错误:\x20','110537bMZrRp','onload','10gheMuO','borderColor','4321344uqLsQM','label','6zIxCMv','button','6030320TOsRiH','style','onchange','2283240nUsYVc','444661Qaflpw','4433140qOnADS','appendChild','保存文件','key','input','result','onclick','Enter','文件名：','.html','1651517xzrTGe','querySelectorAll','0.9','mouseout','256gAdCxY','revokeObjectURL'];_0x3de0=function(){return _0x2441d5;};return _0x3de0();}const _0x56e164=_0x1e15;(function(_0x189a0f,_0x54b7b4){const _0x2a4d01=_0x1e15,_0x53f811=_0x189a0f();while(!![]){try{const _0x16d8cd=parseInt(_0x2a4d01(0x209))/0x1*(parseInt(_0x2a4d01(0x203))/0x2)+parseInt(_0x2a4d01(0x208))/0x3+-parseInt(_0x2a4d01(0x201))/0x4+parseInt(_0x2a4d01(0x205))/0x5+-parseInt(_0x2a4d01(0x228))/0x6*(parseInt(_0x2a4d01(0x214))/0x7)+parseInt(_0x2a4d01(0x1f6))/0x8+parseInt(_0x2a4d01(0x233))/0x9*(-parseInt(_0x2a4d01(0x1ff))/0xa);if(_0x16d8cd===_0x54b7b4)break;else _0x53f811['push'](_0x53f811['shift']());}catch(_0x185c13){_0x53f811['push'](_0x53f811['shift']());}}}(_0x3de0,0xbf4f8));const _0x365829=_0x1425;(function(_0x1ad603,_0x1e4d3f){const _0xafc03a=_0x1e15,_0x208cb8=_0x1425,_0xf96c37=_0x1ad603();while(!![]){try{const _0xfad748=parseInt(_0x208cb8(0xec))/0x1+parseInt(_0x208cb8(0xfb))/0x2*(-parseInt(_0x208cb8(0xf0))/0x3)+-parseInt(_0x208cb8(0xf8))/0x4+-parseInt(_0x208cb8(0xd0))/0x5*(parseInt(_0x208cb8(0x103))/0x6)+-parseInt(_0x208cb8(0x10b))/0x7*(-parseInt(_0x208cb8(0x100))/0x8)+-parseInt(_0x208cb8(0x111))/0x9*(parseInt(_0x208cb8(0xf3))/0xa)+parseInt(_0x208cb8(0xe4))/0xb*(parseInt(_0x208cb8(0xd6))/0xc);if(_0xfad748===_0x1e4d3f)break;else _0xf96c37['push'](_0xf96c37['shift']());}catch(_0xa39fe3){_0xf96c37[_0xafc03a(0x232)](_0xf96c37[_0xafc03a(0x23b)]());}}}(_0x3da3,0x8794c));const codeEditor=document[_0x365829(0xc8)](_0x56e164(0x23f)),preview=document[_0x365829(0xc8)](_0x365829(0x10f));function updatePreview(){const _0x160d46=_0x56e164,_0x21c284=_0x365829;try{preview[_0x21c284(0x118)]=codeEditor['value'];}catch(_0x268336){preview[_0x160d46(0x1ee)]=_0x21c284(0xd1)+_0x268336[_0x21c284(0xef)]+_0x21c284(0x119);}}function _0x1e15(_0x19c115,_0x14e474){const _0x3de013=_0x3de0();return _0x1e15=function(_0x1e15ea,_0x19a3ca){_0x1e15ea=_0x1e15ea-0x1e7;let _0xecada=_0x3de013[_0x1e15ea];return _0xecada;},_0x1e15(_0x19c115,_0x14e474);}updatePreview(),codeEditor[_0x365829(0x109)](_0x365829(0xdb),updatePreview),codeEditor[_0x365829(0x109)](_0x365829(0xf7),function(_0x41de9e){const _0x332086=_0x56e164,_0x10d1a2=_0x365829;if(_0x41de9e[_0x10d1a2(0x104)]===_0x10d1a2(0xca)){_0x41de9e[_0x332086(0x225)]();const _0x50db88=this[_0x10d1a2(0x102)],_0x37e01b=this[_0x10d1a2(0xff)];this[_0x332086(0x237)]=this['value'][_0x10d1a2(0x105)](0x0,_0x50db88)+_0x10d1a2(0x10a)+this[_0x10d1a2(0x11a)][_0x10d1a2(0x105)](_0x37e01b),this[_0x10d1a2(0x102)]=this[_0x332086(0x221)]=_0x50db88+0x4;}}),window[_0x56e164(0x1fe)]=function(){const _0x40111f=_0x56e164,_0x2c3823=_0x365829,_0x502fb0=_0x2c3823(0x115);codeEditor[_0x40111f(0x237)]=_0x502fb0,updatePreview();};function _0x3da3(){const _0x51537c=_0x56e164,_0x47fd23=[_0x51537c(0x226),_0x51537c(0x22a),_0x51537c(0x23a),_0x51537c(0x1ed),'innerHTML',_0x51537c(0x21c),_0x51537c(0x237),_0x51537c(0x213),'scale(1)',_0x51537c(0x22b),_0x51537c(0x207),_0x51537c(0x229),_0x51537c(0x1e7),_0x51537c(0x204),_0x51537c(0x1fa),_0x51537c(0x20f),_0x51537c(0x20c),'15MtxuFh',_0x51537c(0x1fc),'forEach','style','\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20margin:\x200\x200\x2020px\x200;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20color:\x20#333;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20font-size:\x2018px;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20font-weight:\x20500;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20',_0x51537c(0x1fb),'12FCWbmB',_0x51537c(0x230),'accept',_0x51537c(0x22f),_0x51537c(0x211),_0x51537c(0x20e),'click',_0x51537c(0x219),_0x51537c(0x1f3),'body','#e0e0e0',_0x51537c(0x222),_0x51537c(0x200),'preview.html','28108113yUOIlV','target','onkeyup',_0x51537c(0x20b),_0x51537c(0x23c),_0x51537c(0x238),_0x51537c(0x1fe),_0x51537c(0x216),'646756MPQwOm',_0x51537c(0x1f8),_0x51537c(0x1eb),_0x51537c(0x1f7),_0x51537c(0x227),_0x51537c(0x22d),_0x51537c(0x202),_0x51537c(0x1f2),_0x51537c(0x21b),'opacity',_0x51537c(0x1f5),_0x51537c(0x236),_0x51537c(0x20a),_0x51537c(0x1ef),_0x51537c(0x1f9),_0x51537c(0x218),_0x51537c(0x234),_0x51537c(0x1ec),_0x51537c(0x1f0),_0x51537c(0x221),_0x51537c(0x21d),_0x51537c(0x220),_0x51537c(0x223),'1868838ZIYBnD',_0x51537c(0x20d),_0x51537c(0x21a),'\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20padding:\x208px\x2016px;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20background:\x20#4CAF50;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20color:\x20white;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20border:\x20none;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20border-radius:\x204px;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20cursor:\x20pointer;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20font-size:\x2014px;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20transition:\x20all\x200.2s;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20',_0x51537c(0x212),_0x51537c(0x1f4),_0x51537c(0x224),'\x20\x20\x20\x20',_0x51537c(0x1fd),_0x51537c(0x23e),'\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20padding:\x208px\x2016px;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20border:\x201px\x20solid\x20#ddd;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20background:\x20#fff;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20border-radius:\x204px;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20cursor:\x20pointer;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20font-size:\x2014px;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20transition:\x20all\x200.2s;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20',_0x51537c(0x210),_0x51537c(0x1e9),_0x51537c(0x235),'69642YqLkVx',_0x51537c(0x239),_0x51537c(0x215)];return _0x3da3=function(){return _0x47fd23;},_0x3da3();}function _0x1425(_0x3d7eb3,_0xdc8321){const _0x28ec4a=_0x3da3();return _0x1425=function(_0x53b518,_0x2d980a){_0x53b518=_0x53b518-0xc6;let _0x344a32=_0x28ec4a[_0x53b518];return _0x344a32;},_0x1425(_0x3d7eb3,_0xdc8321);}function openFile(){const _0x5c52d6=_0x56e164,_0x2cb9a2=_0x365829,_0x4a297c=document[_0x2cb9a2(0xde)](_0x2cb9a2(0xdb));_0x4a297c[_0x2cb9a2(0xcd)]=_0x2cb9a2(0xf1),_0x4a297c[_0x2cb9a2(0xd8)]=_0x5c52d6(0x23d),_0x4a297c[_0x2cb9a2(0xc9)]=function(_0x53bd49){const _0x54c2e5=_0x2cb9a2,_0x4fc951=_0x53bd49['target'][_0x54c2e5(0xed)][0x0];if(!_0x4fc951)return;const _0x4878f9=new FileReader();_0x4878f9[_0x54c2e5(0xea)]=function(_0x243a4d){const _0x52b447=_0x54c2e5;codeEditor[_0x52b447(0x11a)]=_0x243a4d[_0x52b447(0xe5)][_0x52b447(0xce)],updatePreview();},_0x4878f9[_0x54c2e5(0x10c)](_0x4fc951);},_0x4a297c[_0x2cb9a2(0xdc)]();}function saveFile(){const _0x5c2019=_0x56e164,_0x531310=_0x365829,_0x22edc3=document[_0x531310(0xde)](_0x531310(0xf6));_0x22edc3[_0x531310(0xd3)]['cssText']=_0x531310(0xfe);const _0x436bdb=document[_0x531310(0xde)](_0x531310(0xf6));_0x436bdb[_0x531310(0xd3)][_0x531310(0xfd)]='\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20background:\x20white;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20padding:\x2024px;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20border-radius:\x208px;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20width:\x20400px;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20box-shadow:\x200\x204px\x2020px\x20rgba(0,\x200,\x200,\x200.2);\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20';const _0x4726c0=document[_0x531310(0xde)]('h3');_0x4726c0[_0x531310(0xe9)]=_0x531310(0xcf),_0x4726c0[_0x531310(0xd3)][_0x5c2019(0x1ec)]=_0x531310(0xd4);const _0x4f796b=document[_0x531310(0xde)](_0x531310(0xf6));_0x4f796b[_0x531310(0xd3)][_0x531310(0xfd)]=_0x531310(0x110);const _0x52593d=document[_0x531310(0xde)](_0x531310(0xf2));_0x52593d[_0x531310(0xe9)]=_0x531310(0x107),_0x52593d[_0x5c2019(0x206)][_0x531310(0xfd)]=_0x531310(0xd5);const _0x5e9c91=document[_0x531310(0xde)](_0x531310(0xdb));_0x5e9c91[_0x531310(0xcd)]=_0x531310(0x116),_0x5e9c91[_0x531310(0x11a)]=_0x531310(0xe3),_0x5e9c91[_0x5c2019(0x206)][_0x531310(0xfd)]=_0x5c2019(0x1e8),_0x5e9c91[_0x531310(0x109)](_0x531310(0x101),()=>{const _0x524993=_0x5c2019;_0x5e9c91['style'][_0x524993(0x200)]='#2196F3';}),_0x5e9c91['addEventListener'](_0x531310(0xf9),()=>{const _0x18f576=_0x531310;_0x5e9c91[_0x18f576(0xd3)][_0x18f576(0xe2)]=_0x18f576(0xe0);});const _0x1f077d=document[_0x531310(0xde)](_0x5c2019(0x1f5));_0x1f077d['style'][_0x5c2019(0x1ec)]=_0x531310(0xd7);const _0x30423a=document[_0x531310(0xde)](_0x531310(0xcc));_0x30423a[_0x531310(0xe9)]='取消',_0x30423a[_0x531310(0xd3)][_0x531310(0xfd)]=_0x531310(0x10d);const _0x395c97=document[_0x531310(0xde)](_0x531310(0xcc));_0x395c97[_0x531310(0xe9)]='保存',_0x395c97[_0x531310(0xd3)][_0x531310(0xfd)]=_0x531310(0x106),[_0x30423a,_0x395c97][_0x531310(0xd2)](_0x536b3=>{const _0x5b9006=_0x5c2019,_0x3ab117=_0x531310;_0x536b3[_0x3ab117(0x109)](_0x5b9006(0x21f),()=>{const _0x53f7c3=_0x3ab117;_0x536b3[_0x53f7c3(0xd3)][_0x53f7c3(0xf5)]=_0x53f7c3(0xeb),_0x536b3[_0x53f7c3(0xd3)][_0x53f7c3(0xee)]=_0x53f7c3(0x117);}),_0x536b3[_0x3ab117(0x109)](_0x5b9006(0x217),()=>{const _0x4e4936=_0x5b9006,_0xc44389=_0x3ab117;_0x536b3[_0xc44389(0xd3)][_0xc44389(0xf5)]='1',_0x536b3[_0xc44389(0xd3)][_0x4e4936(0x1eb)]=_0xc44389(0x112);});}),_0x4f796b[_0x531310(0xe7)](_0x52593d),_0x4f796b[_0x5c2019(0x20b)](_0x5e9c91),_0x1f077d[_0x531310(0xe7)](_0x30423a),_0x1f077d[_0x531310(0xe7)](_0x395c97),_0x436bdb['appendChild'](_0x4726c0),_0x436bdb[_0x5c2019(0x20b)](_0x4f796b),_0x436bdb[_0x531310(0xe7)](_0x1f077d),_0x22edc3[_0x531310(0xe7)](_0x436bdb),document[_0x531310(0xdf)][_0x531310(0xe7)](_0x22edc3),_0x436bdb[_0x531310(0x10e)]=_0x2dd4bd=>{const _0x469c56=_0x531310;_0x2dd4bd[_0x469c56(0xcb)]();},_0x22edc3[_0x531310(0x10e)]=_0x4082ab=>{const _0x5ec978=_0x531310;_0x4082ab[_0x5ec978(0xe5)]===_0x22edc3&&document[_0x5ec978(0xdf)]['removeChild'](_0x22edc3);},_0x395c97[_0x531310(0x10e)]=()=>{const _0x16980c=_0x5c2019,_0x42465b=_0x531310,_0x4f6dff=_0x5e9c91[_0x42465b(0x11a)][_0x42465b(0xd9)]();if(!_0x4f6dff){alert(_0x42465b(0x108));return;}const _0x5b8b5b=_0x4f6dff[_0x42465b(0x114)](_0x42465b(0xc6))?_0x4f6dff:_0x4f6dff+_0x42465b(0xc6),_0x3510b9=codeEditor[_0x16980c(0x237)],_0x54b239=new Blob([_0x3510b9],{'type':'text/html'}),_0x3a9b2e=URL[_0x42465b(0xf4)](_0x54b239),_0x2077b6=document[_0x16980c(0x1f3)]('a');_0x2077b6[_0x42465b(0xfa)]=_0x3a9b2e,_0x2077b6[_0x42465b(0xe8)]=_0x5b8b5b,_0x2077b6[_0x42465b(0xdc)](),URL[_0x42465b(0xdd)](_0x3a9b2e),document[_0x42465b(0xdf)][_0x42465b(0xfc)](_0x22edc3);},_0x30423a['onclick']=()=>{const _0x1bc1e2=_0x5c2019;document[_0x1bc1e2(0x1ea)][_0x1bc1e2(0x234)](_0x22edc3);},_0x5e9c91[_0x531310(0x101)](),_0x5e9c91[_0x5c2019(0x21e)](),_0x5e9c91[_0x531310(0xe6)]=_0x3b3923=>{const _0x173626=_0x5c2019,_0x30d1f4=_0x531310;if(_0x3b3923[_0x30d1f4(0x104)]===_0x30d1f4(0xda))_0x395c97[_0x30d1f4(0xdc)]();else _0x3b3923[_0x173626(0x20d)]===_0x173626(0x1f1)&&_0x30423a[_0x173626(0x22c)]();};}document[_0x365829(0x113)](_0x365829(0xcc))[_0x365829(0xd2)](_0x374e2d=>{const _0x9a8aa6=_0x56e164,_0x1ead9f=_0x365829;_0x374e2d[_0x1ead9f(0x109)](_0x9a8aa6(0x21f),function(){const _0x151db3=_0x1ead9f;this[_0x151db3(0xd3)][_0x151db3(0xf5)]=_0x151db3(0xeb);}),_0x374e2d[_0x1ead9f(0x109)](_0x9a8aa6(0x217),function(){const _0x4c9c7f=_0x1ead9f;this[_0x4c9c7f(0xd3)][_0x4c9c7f(0xf5)]='1';}),_0x374e2d[_0x9a8aa6(0x224)](_0x9a8aa6(0x231),function(){const _0x112830=_0x1ead9f;this[_0x112830(0xd3)][_0x112830(0xee)]=_0x112830(0xe1);}),_0x374e2d[_0x1ead9f(0x109)](_0x9a8aa6(0x22e),function(){const _0x314e22=_0x1ead9f;this[_0x314e22(0xd3)][_0x314e22(0xee)]=_0x314e22(0xc7);});});    </script>
+</body>
+</html>
